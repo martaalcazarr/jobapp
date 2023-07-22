@@ -1,2 +1,7 @@
 class Offer < ApplicationRecord
-end
+    has_many :job_applications
+    belongs_to :user
+  
+   
+  end
+  
