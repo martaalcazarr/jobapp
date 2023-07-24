@@ -1,24 +1,28 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
-  before_action :configure_sign_up_params, only: [:create]
+  skip_before_action :require_no_authentication, only: [:new, :create]
+  
   # before_action :configure_account_update_params, only: [:update]
 
-  # GET /resource/sign_up
-  def new
-    super do |resource|
-    resource.images.build
-    end
-  end   
-
-  # POST /resource
-  def create
-    if current_user&.admin? # Verifica si el usuario actual es Esteban (si ya está logueado y tiene el atributo admin en true)
-      super
-    else
-      redirect_to root_path, alert: "No tienes permisos para crear usuarios."
-    end
+# GET /resource/sign_up
+def new
+  super do |resource|
+    resource.build_image_attachment unless resource.image.attached? 
   end
+end
+
+# POST /resource
+def create
+  puts "Current User: #{current_user.inspect}"
+  if current_user&.admin? # Verifica si el usuario actual es Esteban (si ya está logueado y tiene el atributo admin en true)
+    build_resource(sign_up_params)
+    resource.save
+    flash[:notice] = "Usuario creado correctamente."
+  else
+    puts @user.errors.full_messages
+  end
+end
   # GET /resource/edit
   # def edit
   #   super
@@ -49,7 +53,19 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def sign_up_params
     params.require(:user).permit(:name, :email, :password, :password_confirmation, images_attributes: [:url, :context])
   end
+  def check_admin
+    @is_admin = current_user&.admin?
+  end
+  # Redirigir siempre a la página principal después de crear un usuario
+  def after_sign_up_path_for(resource)
+    root_path
+  end
 
+  # Sobrescribimos el método sign_up para evitar que se inicie sesión automáticamente
+  def sign_up(resource_name, resource)
+    build_resource(sign_up_params)
+    resource.save
+  end
   # If you have extra params to permit, append them to the sanitizer.
   # def configure_account_update_params
   #   devise_parameter_sanitizer.permit(:account_update, keys: [:attribute])

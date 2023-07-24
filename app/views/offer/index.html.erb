@@ -1,6 +1,8 @@
 <h1>Lista de ofertas</h1>
-<ul>
-  <% @offers.each do |offer| %>
-    <li><%= offer.title %></li>
-  <% end %>
-</ul>
+
+<% @offers.each do |offer| %>
+  <div>
+    <h3><%= offer.title %></h3>
+    <p><%= offer.description %></p>
+  </div>
+<% end %>
