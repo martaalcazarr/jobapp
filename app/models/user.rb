@@ -4,7 +4,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   has_many :job_applications
-  has_many :offers, foreign_key: :admin_id
+  has_many :offers
   has_one_attached :image
   def self.esteban
     find_by(admin: true)
